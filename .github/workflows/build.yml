@@ -24,7 +24,7 @@ jobs:
       uses: gradle/actions/setup-gradle@v3
 
     - name: Compilar y empaquetar mod
-      run: gradle deploy
+      run: gradle jar
 
     - name: Subir artefacto JAR
       uses: actions/upload-artifact@v4
