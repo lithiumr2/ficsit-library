@@ -1,0 +1,38 @@
+name: Gemini Code Reviewer
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  ai-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Gemini AI Analysis
+        env:
+          API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python -c '
+          import os, urllib.request, json
+          api_key = os.environ["API_KEY"]
+          url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+          data = {"contents": [{"parts": [{"text": "Analiza brevemente el propósito de este repositorio de modding para Mindustry."}]}]}
+          req = urllib.request.Request(url, data=json.dumps(data).encode("utf-8"), headers={"Content-Type": "application/json", "x-goog-api-key": api_key})
+          try:
+              with urllib.request.urlopen(req) as resp:
+                  res = json.loads(resp.read().decode("utf-8"))
+                  print("Respuesta de Gemini desde GitHub Actions:")
+                  print(res["candidates"][0]["content"]["parts"][0]["text"])
+          except Exception as e:
+              print(f"Error: {e}")
+          '
