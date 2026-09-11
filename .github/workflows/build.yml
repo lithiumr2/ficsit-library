@@ -1,0 +1,33 @@
+name: Build Mindustry Mod
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout del código
+      uses: actions/checkout@v4
+
+    - name: Configurar Java 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Dar permisos a Gradle Wrapper
+      run: chmod +x gradlew
+
+    - name: Compilar y empaquetar mod
+      run: ./gradlew deploy
+
+    - name: Subir artefacto JAR
+      uses: actions/upload-artifact@v4
+      with:
+        name: ficsit-library-release
+        path: build/libs/*.jar

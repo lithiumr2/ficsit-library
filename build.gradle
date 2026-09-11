@@ -1,0 +1,26 @@
+apply plugin: "java"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://www.jitpack.io" }
+    maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+}
+
+dependencies {
+    compileOnly "com.github.Anuken.Mindustry:core:v145"
+}
+
+jar {
+    archiveFileName = "ficsit-library.jar"
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from(rootDir) {
+        include "mod.hjson"
+    }
+}

@@ -1,0 +1,8 @@
+name: "ficsit-library"
+displayName: "Ficsit Library"
+author: "TuNombre"
+description: "Libreria de mecanicas de automatizacion inspiradas en Satisfactory para Mindustry."
+version: "1.0"
+minGameVersion: "154"
+java: true
+main: "ficsit.library.FicsitLibrary"
