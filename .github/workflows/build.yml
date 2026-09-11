@@ -20,11 +20,11 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Dar permisos a Gradle Wrapper
-      run: chmod +x gradlew
+    - name: Configurar Gradle
+      uses: gradle/actions/setup-gradle@v3
 
     - name: Compilar y empaquetar mod
-      run: ./gradlew deploy
+      run: gradle deploy
 
     - name: Subir artefacto JAR
       uses: actions/upload-artifact@v4
