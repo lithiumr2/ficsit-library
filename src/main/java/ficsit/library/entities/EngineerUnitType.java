@@ -30,24 +30,19 @@ public class EngineerUnitType extends UnitType {
         mineSpeed = 6f;
         mineTier = 2;
 
-        // Capacidad de munición / batería (utilizado por el SideBar nativo del HUD)
-        ammoCapacity = 100;
-        ammoType = new BatteryAmmoType();
-
-        // Desactivar el dibujo de círculo de daño de escudo sobre el sprite (igual que en Oct)
+        // Desactivar el dibujo de círculo de daño de escudo sobre el sprite
         drawShields = false;
 
-        // Habilidad de batería para el inspector / panel de estadísticas de la unidad
+        // Habilidad de batería para el HUD (ForceFieldAbility activa el SideBar nativo Pal.accent)
         abilities.add(new BatteryAbility(100f));
 
-        // Arma principal de la unidad (useAmmo = false para que disparar use su propio balance o no consuma la batería de soporte vital)
+        // Arma principal de la unidad
         weapons.add(new Weapon("ficsit-library-engineer-weapon") {{
             x = 0f;
             y = 0f;
             mirror = false;
             reload = 15f;
             shoot.shots = 1;
-            useAmmo = false;
             bullet = new BasicBulletType(4f, 10) {{
                 width = 5f;
                 height = 7f;

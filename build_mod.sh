@@ -16,7 +16,10 @@ cd $DEX_DIR
 zip -u ../../$JAR_PATH classes.dex
 cd ../../
 
-echo "[4/4] Exportando mod a Descargas..."
-cp $JAR_PATH /sdcard/Download/ficsit-library.jar
-
-echo "¡Listo! Mod actualizado en Descargas."
+echo "[4/4] Exportando mod..."
+if [ -d "/sdcard/Download" ]; then
+    cp $JAR_PATH /sdcard/Download/ficsit-library.jar
+    echo "¡Listo! Mod copiado a /sdcard/Download/ficsit-library.jar"
+else
+    echo "¡Listo! Mod generado en $JAR_PATH"
+fi

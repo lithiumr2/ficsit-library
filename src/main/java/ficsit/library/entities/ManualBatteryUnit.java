@@ -37,7 +37,6 @@ public class ManualBatteryUnit extends UnitEntity {
         this.battery = 100f;
         this.maxBattery = 100f;
         this.shield = 100f;
-        this.ammo = 100f;
     }
 
     @Override
@@ -50,11 +49,6 @@ public class ManualBatteryUnit extends UnitEntity {
         super.update();
 
         if (!isAdded() || dead) return;
-
-        // Asegurar que las reglas permitan mostrar la barra de batería en el HUD del jugador
-        if (isPlayer() && Vars.state != null && Vars.state.rules != null) {
-            Vars.state.rules.unitAmmo = true;
-        }
 
         // Comprobar recarga cerca de núcleo aliado (o red de energía aliada)
         Building core = closestCore();
@@ -86,9 +80,8 @@ public class ManualBatteryUnit extends UnitEntity {
             damage(0.05f * Time.delta);
         }
 
-        // Sincronizar simultáneamente con el escudo nativo y el canal de munición
+        // Sincronizar con el escudo nativo (HudFragment lee unit.shield)
         shield = Math.max(0f, battery);
-        ammo = Math.max(0f, battery);
     }
 
     /**
@@ -110,6 +103,5 @@ public class ManualBatteryUnit extends UnitEntity {
         battery = read.f();
         maxBattery = read.f();
         shield = battery;
-        ammo = battery;
     }
 }

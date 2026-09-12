@@ -27,7 +27,6 @@ public class EngineerUnitEntity extends UnitEntity {
         this.battery = 100f;
         this.maxBattery = 100f;
         this.shield = 100f;
-        this.ammo = 100f;
     }
 
     @Override
@@ -35,10 +34,6 @@ public class EngineerUnitEntity extends UnitEntity {
         super.update();
 
         if(!isAdded() || dead) return;
-
-        if (isPlayer() && Vars.state != null && Vars.state.rules != null) {
-            Vars.state.rules.unitAmmo = true;
-        }
 
         Building nucleo = closestCore();
         boolean cercaDeNucleo = (nucleo != null && within(nucleo, radioDeRecarga));
@@ -58,7 +53,6 @@ public class EngineerUnitEntity extends UnitEntity {
         }
 
         shield = Math.max(0f, battery);
-        ammo = Math.max(0f, battery);
     }
 
     @Override

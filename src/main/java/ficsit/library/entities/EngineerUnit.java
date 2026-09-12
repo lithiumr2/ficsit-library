@@ -13,7 +13,7 @@ public class EngineerUnit extends UnitType {
     public EngineerUnit(String name) {
         super(name);
         
-        constructor = EngineerUnitEntity::create;
+        constructor = EngineerUnitEntity::new;
         
         speed = 4f;
         drag = 0.05f;

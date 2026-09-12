@@ -36,14 +36,13 @@ public class BatteryAbility extends ForceFieldAbility {
         if (unit instanceof ManualBatteryUnit) {
             ManualBatteryUnit b = (ManualBatteryUnit) unit;
             this.max = b.maxBattery;
-            // Sincronizar simultáneamente el campo nativo de escudo y el de munición con la batería real
+            // Sincronizar el campo nativo unit.shield con el valor real de batería
+            // HudFragment lee shield / ff.max para pintar la barra Pal.accent
             unit.shield = Math.max(0f, b.battery);
-            unit.ammo = Math.max(0f, b.battery);
         } else if (unit instanceof EngineerUnitEntity) {
             EngineerUnitEntity b = (EngineerUnitEntity) unit;
             this.max = b.maxBattery;
             unit.shield = Math.max(0f, b.battery);
-            unit.ammo = Math.max(0f, b.battery);
         }
     }
 
