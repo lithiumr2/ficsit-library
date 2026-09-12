@@ -7,6 +7,7 @@ import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.gen.EntityMapping;
 import mindustry.gen.UnitEntity;
+import mindustry.world.Tile;
 import mindustry.world.blocks.power.PowerNode;
 import mindustry.world.modules.ItemModule;
 import mindustry.game.Team;
@@ -15,8 +16,8 @@ import arc.struct.Seq;
 public class ManualBatteryUnit extends UnitEntity {
     public float battery = 100f;
     public float maxBattery = 100f;
-    public float rechargeRadius = 1600f; // Rango base del HUB
-    public float nodeRechargeRadius = 400f; // Rango de los postes eléctricos
+    public float rechargeRadius = 1600f;
+    public float nodeRechargeRadius = 400f;
     public float rechargeRate = 1.5f;
     public float decayRate = 0.01f;
     
@@ -44,7 +45,6 @@ public class ManualBatteryUnit extends UnitEntity {
     public boolean isNearCore() {
         if (team == null || Vars.state.isMenu()) return false;
         
-        // Siempre buscamos en el equipo actual (Team.sharded)
         if (team.cores() != null) {
             for (int i = 0; i < team.cores().size; i++) {
                 Building c = team.cores().get(i);
@@ -102,22 +102,39 @@ public class ManualBatteryUnit extends UnitEntity {
         // Lógica de Swap de Inventario (Pocket vs Base)
         // ============================================
         Building secretBuild = Vars.world.build(0, 0);
+        
+        // AUTO-GENERAR EL NUCLEO SECRETO SI NO EXISTE
+        if (secretBuild == null || secretBuild.block != ficsit.library.content.FicsitBlocks.secretCore) {
+            Tile t = Vars.world.tile(0, 0);
+            if (t != null) {
+                t.setNet(ficsit.library.content.FicsitBlocks.secretCore, Team.all[5], 0);
+                secretBuild = t.build;
+                if (secretBuild != null && secretBuild.items != null && secretBuild.items.total() == 0) {
+                    secretBuild.items.add(Vars.content.item("copper"), 150);
+                    secretBuild.items.add(Vars.content.item("lead"), 100);
+                }
+            }
+        }
+
         if (secretBuild != null && secretBuild.block == ficsit.library.content.FicsitBlocks.secretCore) {
             ItemModule pocket = secretBuild.items;
             
-            // Suponiendo que el jugador esta en el mismo equipo que el HUB
-            if (team.core() != null && team.core().block instanceof ficsit.library.blocks.HubBlock) {
-                ficsit.library.blocks.HubBlock.HubBuild hub = (ficsit.library.blocks.HubBlock.HubBuild) team.core();
-                
-                if (nearCore) {
-                    hub.items = hub.realHubItems;
-                    if (isLocal() && !lastNear) {
-                        Vars.ui.showInfoToast("Conectado a la Red FICSIT. Usando inventario del HUB.", 2f);
-                    }
-                } else {
-                    hub.items = pocket;
-                    if (isLocal() && lastNear) {
-                        Vars.ui.showInfoToast("Desconectado de la Red FICSIT. Usando Inventario de Bolsillo.", 2f);
+            if (team.cores() != null) {
+                for (Building c : team.cores()) {
+                    if (c instanceof ficsit.library.blocks.HubBlock.HubBuild) {
+                        ficsit.library.blocks.HubBlock.HubBuild hub = (ficsit.library.blocks.HubBlock.HubBuild) c;
+                        
+                        if (nearCore) {
+                            hub.items = hub.realHubItems;
+                            if (isLocal() && !lastNear) {
+                                Vars.ui.showInfoToast("Conectado a la Red FICSIT. Usando inventario del HUB.", 2f);
+                            }
+                        } else {
+                            hub.items = pocket;
+                            if (isLocal() && lastNear) {
+                                Vars.ui.showInfoToast("Desconectado de la Red FICSIT. Usando Inventario de Bolsillo.", 2f);
+                            }
+                        }
                     }
                 }
             }

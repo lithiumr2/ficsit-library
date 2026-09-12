@@ -15,7 +15,7 @@ public class FicsitBlocks {
 
     public static void load() {
         secretCore = new SecretCore("secret-core");
-
+        
         hub = new HubBlock("ficsit-hub") {{
             requirements(Category.effect, ItemStack.with());
             alwaysUnlocked = true;
@@ -35,7 +35,7 @@ public class FicsitBlocks {
             laserRange = 10;
             maxNodes = 10;
             localizedName = "Estación de Carga";
-            description = "Extiende la red de energía del traje y permite transferir ítems manualmente entre tu inventario y el núcleo.";
+            description = "Extiende la red de energía del traje y permite transferir ítems manualmente hacia tu bolsillo (núcleo secreto).";
         }};
     }
 }
