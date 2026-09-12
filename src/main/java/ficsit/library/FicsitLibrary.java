@@ -10,7 +10,6 @@ import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.world.Tile;
-import ficsit.library.content.FicsitPlanets;
 import ficsit.library.core.ChunkManager;
 import ficsit.library.core.FicsitGenerator;
 import ficsit.library.core.VirtualWorldManager;
@@ -25,11 +24,10 @@ public class FicsitLibrary extends FicsitLibraryMod {
         // Botones en el menu principal para acceso directo
         Events.on(EventType.ClientLoadEvent.class, e -> {
             if (Vars.ui != null && Vars.ui.menufrag != null) {
-                // Boton directo para abrir la vista del Planeta FICSIT en Campaña
-                Vars.ui.menufrag.addButton("Planeta FICSIT", () -> {
-                    if (Vars.ui.planet != null && FicsitPlanets.massageage != null) {
+                // Boton directo para abrir la vista de planetas en Campaña
+                Vars.ui.menufrag.addButton("Planetas / Campaña", () -> {
+                    if (Vars.ui.planet != null) {
                         Vars.ui.planet.show();
-                        Vars.ui.planet.viewPlanet(FicsitPlanets.massageage, true);
                     }
                 });
 
