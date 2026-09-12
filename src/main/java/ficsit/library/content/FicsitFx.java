@@ -21,7 +21,7 @@ public class FicsitFx {
         Fill.rect(e.x, e.y + rise, size, size * 1.5f);
         
         // Estela del motor
-        Draw.color(Pal.techCrits);
+        Draw.color(Pal.accent);
         Lines.stroke(size / 2f * alpha);
         Lines.line(e.x, e.y + rise - size, e.x, e.y + rise - size - 10f * e.fout());
     });
