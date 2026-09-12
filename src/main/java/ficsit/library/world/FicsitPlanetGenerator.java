@@ -8,7 +8,6 @@ import ficsit.library.core.FicsitGenerator;
 import mindustry.game.Team;
 import mindustry.world.Tiles;
 import mindustry.type.Sector;
-import mindustry.game.WorldParams;
 
 public class FicsitPlanetGenerator extends PlanetGenerator {
 
@@ -28,7 +27,7 @@ public class FicsitPlanetGenerator extends PlanetGenerator {
     }
 
     @Override
-    public void generate(Tiles tiles, Sector sec, WorldParams params) {
+    public void generate(Tiles tiles, Sector sec, int seed) {
         this.tiles = tiles;
         this.sector = sec;
         this.width = tiles.width;

@@ -31,7 +31,6 @@ public class FicsitMod extends Mod {
                         Vars.state.rules.editor = false;
                         Vars.state.rules.canGameOver = false;
                         Vars.state.rules.infiniteResources = true;
-                        Events.fire(new EventType.RulesLoadEvent(Vars.state.rules));
                         Vars.logic.play();
                         Events.fire(EventType.Trigger.newGame);
                     });
