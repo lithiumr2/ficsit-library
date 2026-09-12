@@ -10,6 +10,9 @@ import mindustry.Vars;
 import mindustry.content.Items;
 import ficsit.library.content.FicsitItems;
 import mindustry.type.Item;
+import mindustry.world.modules.ItemModule;
+import arc.util.io.Reads;
+import arc.util.io.Writes;
 
 public class HubBlock extends CoreBlock {
     public HubBlock(String name) {
@@ -18,11 +21,13 @@ public class HubBlock extends CoreBlock {
     }
 
     public class HubBuild extends CoreBuild {
+        // Inventario fisico real del HUB
+        public ItemModule realHubItems = new ItemModule();
+
         @Override
         public void buildConfiguration(Table table) {
             super.buildConfiguration(table);
             
-            // Botón en la configuración del bloque (al hacer clic en el HUB)
             table.button(Icon.pencil, Styles.cleari, () -> {
                 showCraftingMenu(this);
             }).size(40f);
@@ -37,36 +42,59 @@ public class HubBlock extends CoreBlock {
             }
             return super.onConfigureBuildTapped(other);
         }
+
+        @Override
+        public boolean acceptItem(Building source, Item item){
+            return realHubItems.get(item) < getMaximumAccepted(item);
+        }
+
+        @Override
+        public void handleItem(Building source, Item item){
+            realHubItems.add(item, 1);
+        }
+
+        @Override
+        public void write(Writes write) {
+            ItemModule temp = this.items;
+            this.items = realHubItems;
+            super.write(write);
+            this.items = temp;
+        }
+
+        @Override
+        public void read(Reads read, byte revision) {
+            super.read(read, revision);
+            realHubItems.clear();
+            realHubItems.add(this.items);
+        }
     }
 
-    public static void showCraftingMenu(CoreBuild core) {
+    public static void showCraftingMenu(HubBuild core) {
         BaseDialog dialog = new BaseDialog("Banco de Crafteo Manual (HUB)");
         dialog.addCloseButton();
         
         Table t = dialog.cont;
         t.add("Fabricación Básica. Selecciona una receta:").pad(10f).row();
         
-        // --- Receta 1: Lingote de Cobre ---
         t.button(b -> {
             b.image(FicsitItems.copperIngot.uiIcon).size(32f).padRight(10f);
             b.add("Fabricar Lingote de Cobre\nCosto: 1 Cobre").left();
         }, () -> {
-            if (core.items.has(Items.copper, 1)) {
-                core.items.remove(Items.copper, 1);
-                core.items.add(FicsitItems.copperIngot, 1);
+            if (core.realHubItems.has(Items.copper, 1)) {
+                core.realHubItems.remove(Items.copper, 1);
+                core.realHubItems.add(FicsitItems.copperIngot, 1);
             } else {
                 Vars.ui.showInfoToast("No hay suficiente cobre en el núcleo", 2f);
             }
         }).size(350f, 60f).pad(4f).row();
 
-        // --- Receta 2: Placa de Plomo ---
         t.button(b -> {
             b.image(FicsitItems.leadPlate.uiIcon).size(32f).padRight(10f);
             b.add("Fabricar Placa de Plomo\nCosto: 1 Plomo").left();
         }, () -> {
-            if (core.items.has(Items.lead, 1)) {
-                core.items.remove(Items.lead, 1);
-                core.items.add(FicsitItems.leadPlate, 1);
+            if (core.realHubItems.has(Items.lead, 1)) {
+                core.realHubItems.remove(Items.lead, 1);
+                core.realHubItems.add(FicsitItems.leadPlate, 1);
             } else {
                 Vars.ui.showInfoToast("No hay suficiente plomo en el núcleo", 2f);
             }
