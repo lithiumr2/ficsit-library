@@ -11,14 +11,14 @@ public class FicsitLibrary extends FicsitLibraryMod {
     public FicsitLibrary() {
         super();
         Events.on(WorldLoadEvent.class, e -> {
-            spawnSecretCore();
+            spawnHubCore();
         });
     }
 
-    private void spawnSecretCore() {
+    private void spawnHubCore() {
         Tile targetTile = world.tile(0, 0); 
         if (targetTile != null) {
-            targetTile.setNet(ficsit.library.content.FicsitBlocks.secretCore, Team.sharded, 0);
+            targetTile.setNet(ficsit.library.content.FicsitBlocks.hub, Team.sharded, 0);
             if (Team.sharded.core() != null && Team.sharded.core().items != null) {
                 Team.sharded.core().items.add(Items.copper, 150);
                 Team.sharded.core().items.add(Items.lead, 100);

@@ -23,7 +23,7 @@ public class HubBlock extends CoreBlock {
             super.buildConfiguration(table);
             
             // Botón en la configuración del bloque (al hacer clic en el HUB)
-            table.button(Icon.hammer, Styles.cleari, () -> {
+            table.button(Icon.pencil, Styles.cleari, () -> {
                 showCraftingMenu(this);
             }).size(40f);
         }
