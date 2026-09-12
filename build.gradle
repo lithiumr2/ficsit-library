@@ -24,5 +24,6 @@ jar {
         include "mod.hjson"
         include "sprites/**"
         include "assets/**"
+        include "bundles/**"
     }
 }

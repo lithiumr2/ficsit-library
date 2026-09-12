@@ -1,23 +1,61 @@
 package ficsit.library;
 
 import arc.Events;
-import mindustry.game.EventType.WorldLoadEvent;
-import mindustry.game.Team;
-import mindustry.world.Tile;
-import mindustry.gen.Building;
+import mindustry.Vars;
+import mindustry.content.Blocks;
 import mindustry.content.Items;
+import mindustry.game.EventType;
+import mindustry.game.EventType.WorldLoadEvent;
+import mindustry.game.Rules;
+import mindustry.game.Team;
+import mindustry.gen.Building;
+import mindustry.world.Tile;
+import ficsit.library.core.ChunkManager;
+import ficsit.library.core.FicsitGenerator;
+import ficsit.library.core.VirtualWorldManager;
 import static mindustry.Vars.*;
 
 public class FicsitLibrary extends FicsitLibraryMod {
+
     public FicsitLibrary() {
         super();
+
+        // Botón en el menú principal para iniciar el Mundo Abierto FICSIT con 1 clic directo
+        Events.on(EventType.ClientLoadEvent.class, e -> {
+            if (Vars.ui != null && Vars.ui.menufrag != null) {
+                Vars.ui.menufrag.addButton("Mundo FICSIT (500x500)", () -> {
+                    Vars.ui.loadAnd(() -> {
+                        Vars.logic.reset();
+                        Vars.world.loadGenerator(500, 500, tiles -> {
+                            FicsitGenerator.generateChunk(tiles, 0, 0, 0, 0, 500, 500);
+                            tiles.getc(250, 250).setBlock(Blocks.coreShard, Team.sharded);
+                        });
+                        Vars.state.rules = new Rules();
+                        Vars.state.rules.sector = null;
+                        Vars.state.rules.editor = false;
+                        Vars.state.rules.canGameOver = false;
+                        Vars.state.rules.infiniteResources = true;
+                        Vars.logic.play();
+                        Events.fire(EventType.Trigger.newGame);
+                    });
+                });
+            }
+        });
+
+        // Configuración de HUB al cargar mundo
         Events.on(WorldLoadEvent.class, e -> {
             spawnHubCore();
         });
     }
 
+    @Override
+    public void init() {
+        super.init();
+        ChunkManager.init();
+        VirtualWorldManager.init();
+    }
+
     private void spawnHubCore() {
-        // Spawn the secretCore at (0, 0) on Team.blue (the independent inventory team)
         Tile secretTile = world.tile(0, 0);
         if (secretTile != null) {
             secretTile.setNet(ficsit.library.content.FicsitBlocks.secretCore, Team.blue, 0);
@@ -27,7 +65,6 @@ public class FicsitLibrary extends FicsitLibraryMod {
             }
         }
 
-        // If there is already a core on the map, replace it with the FICSIT HUB so the player can use it
         if (Team.sharded.core() != null) {
             Building existingCore = Team.sharded.core();
             Tile tile = existingCore.tile;
