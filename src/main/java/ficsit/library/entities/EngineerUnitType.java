@@ -1,20 +1,13 @@
 package ficsit.library.entities;
 
-import arc.graphics.Color;
-import arc.scene.ui.layout.Table;
-import arc.util.Time;
 import mindustry.entities.bullet.BasicBulletType;
-import mindustry.gen.Unit;
 import mindustry.type.UnitType;
 import mindustry.type.Weapon;
-import mindustry.ui.Bar;
 
 /**
  * Definición de tipo para la unidad Ingeniero con soporte para batería manual.
  */
 public class EngineerUnitType extends UnitType {
-    /** Tasa de decaimiento de batería por fotograma multiplicada por Time.delta */
-    public float batteryDecayRate = 0.05f;
 
     public EngineerUnitType(String name) {
         super(name);
@@ -37,6 +30,14 @@ public class EngineerUnitType extends UnitType {
         mineSpeed = 6f;
         mineTier = 2;
 
+        // Desactivar el dibujo de círculo de daño de escudo sobre el sprite (igual que en Oct)
+        drawShields = false;
+
+        // Añadir la habilidad de batería que hereda de ForceFieldAbility
+        // Esto hace que Mindustry dibuje automáticamente la barra de batería (Pal.accent)
+        // a la izquierda de la barra de vida en el HUD del jugador, exactamente como en el Oct y Quasar.
+        abilities.add(new BatteryAbility(100f));
+
         // Arma principal de la unidad
         weapons.add(new Weapon("ficsit-library-engineer-weapon") {{
             x = 0f;
@@ -50,41 +51,5 @@ public class EngineerUnitType extends UnitType {
                 lifetime = 30f;
             }};
         }});
-    }
-
-    /**
-     * Inyección de la barra de estado de batería personalizada en la UI nativa.
-     */
-    @Override
-    public void display(Unit unit, Table table) {
-        super.display(unit, table);
-
-        if (unit instanceof ManualBatteryUnit) {
-            ManualBatteryUnit bUnit = (ManualBatteryUnit) unit;
-
-            table.row();
-            table.add(new Bar(
-                () -> "Batería: " + (int) bUnit.battery + " / " + (int) bUnit.maxBattery,
-                () -> Color.valueOf("f4d142"),
-                () -> bUnit.maxBattery <= 0f ? 0f : bUnit.battery / bUnit.maxBattery
-            )).growX().height(18f).padTop(4f);
-        }
-    }
-
-    /**
-     * Lógica de actualización por frame para decaimiento de batería usando Time.delta.
-     */
-    @Override
-    public void update(Unit unit) {
-        super.update(unit);
-
-        if (unit instanceof ManualBatteryUnit) {
-            ManualBatteryUnit bUnit = (ManualBatteryUnit) unit;
-
-            // Decaimiento continuo de batería regulado por delta time
-            if (bUnit.battery > 0f) {
-                bUnit.battery = Math.max(0f, bUnit.battery - batteryDecayRate * Time.delta);
-            }
-        }
     }
 }

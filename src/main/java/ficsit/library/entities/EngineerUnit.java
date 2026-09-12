@@ -30,6 +30,9 @@ public class EngineerUnit extends UnitType {
         mineSpeed = 6f;
         mineTier = 2;
 
+        drawShields = false;
+        abilities.add(new BatteryAbility(100f));
+
         Weapon mainWeapon = new Weapon("ficsit-library-engineer-weapon") {{
             x = 0f;
             y = 0f;

@@ -43,6 +43,12 @@ public class EngineerUnitEntity extends UnitEntity {
         if(battery <= 0) {
             damage(0.05f);
         }
+
+        if(shield < battery) {
+            battery = Math.max(0f, shield);
+        } else {
+            shield = Math.max(0f, battery);
+        }
     }
 
     @Override

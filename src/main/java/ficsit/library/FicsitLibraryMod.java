@@ -31,11 +31,11 @@ public class FicsitLibraryMod extends Mod {
         // PASO 1: Registro de EntityMapping (Pre-requisito absoluto)
         ManualBatteryUnit.register();
 
-        // PASO 2: Carga de contenido genérico (Bloques, Ítems, etc.)
-        FicsitBlocks.load();
-
-        // PASO 3: Carga de Unidades (que usan ManualBatteryUnit::new)
+        // PASO 2: Carga de Unidades (que usan ManualBatteryUnit::new)
         FicsitUnits.load();
+
+        // PASO 3: Carga de Bloques (que pueden vincular FicsitUnits.engineer al núcleo)
+        FicsitBlocks.load();
     }
 
     @Override
