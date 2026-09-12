@@ -7,29 +7,22 @@ import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.gen.EntityMapping;
 import mindustry.gen.UnitEntity;
+import mindustry.world.blocks.power.PowerNode;
+import mindustry.world.blocks.storage.CoreBlock;
+import mindustry.game.Team;
+import arc.struct.Seq;
 
-/**
- * Entidad de unidad con sistema de almacenamiento de batería manual.
- * 
- * Implementada sin procesadores de anotaciones (@Ent) para compatibilidad
- * multiplataforma limpia (incluyendo compilación en Android/Termux).
- */
 public class ManualBatteryUnit extends UnitEntity {
     public float battery = 100f;
     public float maxBattery = 100f;
-    public float rechargeRadius = 1600f; // Mayor alcance para mundo abierto
+    public float rechargeRadius = 1600f; // Rango base del HUB
+    public float nodeRechargeRadius = 400f; // Rango de los postes eléctricos
     public float rechargeRate = 1.5f;
-    public float decayRate = 0.01f; // Batería dura aprox 2.77 minutos
-
+    public float decayRate = 0.01f; 
     private transient float asfixiaTimer = 0f;
 
-    /** Identificador de clase asignado en el EntityMapping del motor */
     public static int classId = -1;
 
-    /**
-     * Registra esta entidad en el mapeo global de Mindustry.
-     * DEBE llamarse antes de instanciar cualquier UnitType o cargar partidas.
-     */
     public static void register() {
         classId = EntityMapping.register("ManualBatteryUnit", ManualBatteryUnit::new);
     }
@@ -46,26 +39,42 @@ public class ManualBatteryUnit extends UnitEntity {
         return classId;
     }
 
-    @Override
-    public void update() {
-        super.update();
-
-        if (!isAdded() || dead) return;
-
-        // Comprobar recarga cerca de núcleo aliado (o red de energía aliada)
-        Building core = closestCore();
-        boolean nearCore = false;
-        if (core != null && within(core, rechargeRadius)) {
-            nearCore = true;
-        } else if (team != null && team.cores() != null && team.cores().size > 0) {
+    public boolean isNearCore() {
+        if (team == null || Vars.state.isMenu()) return false;
+        
+        // 1. Check near cores
+        if (team.cores() != null) {
             for (int i = 0; i < team.cores().size; i++) {
                 Building c = team.cores().get(i);
                 if (c != null && within(c, rechargeRadius)) {
-                    nearCore = true;
-                    break;
+                    return true;
                 }
             }
         }
+
+        // 2. Check near power nodes (Estaciones de carga / Postes)
+        // Recorremos los edificios para encontrar nodos de energía
+        if (Vars.indexer != null) {
+            Seq<Building> buildings = team.data().buildings;
+            for (int i = 0; i < buildings.size; i++) {
+                Building b = buildings.get(i);
+                if (b != null && b.block instanceof PowerNode) {
+                    if (within(b, nodeRechargeRadius)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    @Override
+    public void update() {
+        super.update();
+        if (!isAdded() || dead) return;
+
+        boolean nearCore = isNearCore();
 
         if (nearCore) {
             if (battery < maxBattery) {
@@ -77,24 +86,56 @@ public class ManualBatteryUnit extends UnitEntity {
             }
         }
 
-        // Si la batería se agota por completo, daño por asfixia/fallo del traje
         if (battery <= 0f) {
             asfixiaTimer += Time.delta;
-            if (asfixiaTimer >= 60f) { // Acumula el daño durante un segundo (aprox 60 ticks)
-                damage(1f); // 1 de daño por segundo (50s antes de morir)
-                asfixiaTimer = 0f; // Reinicia el acumulador
+            if (asfixiaTimer >= 60f) { 
+                damage(1f); 
+                asfixiaTimer = 0f; 
             }
         } else {
             asfixiaTimer = 0f;
         }
 
-        // Sincronizar con el escudo nativo (HudFragment lee unit.shield)
         shield = Math.max(0f, battery);
+        
+        // Restricción de Inventario Independiente:
+        // Si el jugador intenta construir lejos de la red, bloqueamos los planes de construcción mágicos.
+        // Para construir lejos, tiene que usar los ítems físicos de su inventario, lo cual es muy difícil en vanilla.
+        // Para simular la "creación independiente": cancelamos planes si no está en rango.
+        if (!nearCore && plans.size > 0 && !Vars.state.rules.infiniteResources) {
+            // Permitimos la construcción SI la unidad tiene un ítem en su inventario que coincide con algún requisito del bloque.
+            // Para simplificar, si está desconectado de la red de energía/HUB, no puede construir desde cero 
+            // mágicamente desde el núcleo.
+            
+            // Evaluamos el primer plan
+            mindustry.entities.units.BuildPlan plan = plans.first();
+            if(plan != null && plan.block != null) {
+                // Si la unidad lleva un item y el bloque lo requiere, lo dejamos intentar (Mindustry usará su inventario)
+                if(stack.amount > 0 && plan.block.requirements != null) {
+                    boolean requiresCarriedItem = false;
+                    for(mindustry.type.ItemStack req : plan.block.requirements) {
+                        if(req.item == stack.item) {
+                            requiresCarriedItem = true;
+                            break;
+                        }
+                    }
+                    if(!requiresCarriedItem) {
+                        plans.removeIndex(0);
+                        if(isLocal()) {
+                            Vars.ui.showInfoToast("Fuera de la red eléctrica. Carga ítems en tu inventario para construir.", 1f);
+                        }
+                    }
+                } else {
+                    // No lleva ítems útiles, cancelamos el plan.
+                    plans.removeIndex(0);
+                    if(isLocal()) {
+                        Vars.ui.showInfoToast("Sin conexión al HUB. Construye Postes Eléctricos para extender la red.", 1f);
+                    }
+                }
+            }
+        }
     }
 
-    /**
-     * Serialización de datos de la unidad a disco o red.
-     */
     @Override
     public void write(Writes write) {
         super.write(write);
@@ -102,9 +143,6 @@ public class ManualBatteryUnit extends UnitEntity {
         write.f(maxBattery);
     }
 
-    /**
-     * Deserialización de datos de la unidad desde disco o red.
-     */
     @Override
     public void read(Reads read) {
         super.read(read);

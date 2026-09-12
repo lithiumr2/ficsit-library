@@ -29,6 +29,7 @@ public class EngineerUnitType extends UnitType {
         buildRange = 220f;
         mineSpeed = 6f;
         mineTier = 2;
+        itemCapacity = 100; // Inventario realista
 
         // Desactivar el dibujo de círculo de daño de escudo sobre el sprite
         drawShields = false;
