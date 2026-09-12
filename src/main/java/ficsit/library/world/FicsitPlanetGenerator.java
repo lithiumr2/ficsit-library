@@ -8,6 +8,7 @@ import arc.math.geom.Vec3;
 import arc.graphics.Color;
 import ficsit.library.core.FicsitGenerator;
 import mindustry.world.blocks.environment.Floor;
+import mindustry.game.Team;
 
 public class FicsitPlanetGenerator extends PlanetGenerator {
 
@@ -29,10 +30,10 @@ public class FicsitPlanetGenerator extends PlanetGenerator {
         int startGlobalY = 0;
         
         // Llamamos a nuestro script de generación procedural (ruido)
-        // para que llene todo el mapa de 500x500 (el tamaño por defecto)
-        FicsitGenerator.generateChunk(0, 0, startGlobalX, startGlobalY, width); // width suele ser 500
+        FicsitGenerator.generateChunk(tiles, 0, 0, startGlobalX, startGlobalY, width, height);
         
-        // Colocamos el nucleo del jugador (Core) justo en el centro del chunk inicial de 500x500
-        tiles.getc(width / 2, height / 2).setBlock(Blocks.coreShard, team);
+        // Colocamos el nucleo del jugador (Core) justo en el centro del chunk inicial
+        // Team.sharded es el equipo de los jugadores por defecto
+        tiles.getc(width / 2, height / 2).setBlock(Blocks.coreShard, Team.sharded);
     }
 }
