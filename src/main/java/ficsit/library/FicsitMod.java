@@ -22,5 +22,6 @@ public class FicsitMod extends Mod {
     public void loadContent() {
         FicsitUnits.load();
         FicsitBlocks.load();
+        ficsit.library.content.FicsitPlanets.load();
     }
 }
