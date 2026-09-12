@@ -8,16 +8,16 @@ import mindustry.gen.Building;
 import mindustry.gen.EntityMapping;
 import mindustry.gen.UnitEntity;
 import mindustry.world.Tile;
-import mindustry.world.blocks.power.PowerNode;
 import mindustry.world.modules.ItemModule;
 import mindustry.game.Team;
-import arc.struct.Seq;
+import ficsit.library.blocks.HubBlock;
+import ficsit.library.blocks.CapsuleBlock;
+import ficsit.library.content.FicsitBlocks;
 
 public class ManualBatteryUnit extends UnitEntity {
     public float battery = 100f;
     public float maxBattery = 100f;
-    public float rechargeRadius = 1600f;
-    public float nodeRechargeRadius = 400f;
+    public float rechargeRadius = 1600f; // Rango base del HUB y Cápsula
     public float rechargeRate = 1.5f;
     public float decayRate = 0.01f;
     
@@ -48,24 +48,11 @@ public class ManualBatteryUnit extends UnitEntity {
         if (team.cores() != null) {
             for (int i = 0; i < team.cores().size; i++) {
                 Building c = team.cores().get(i);
-                if (c != null && c.block == ficsit.library.content.FicsitBlocks.hub && within(c, rechargeRadius)) {
+                if (c != null && (c.block == FicsitBlocks.hub || c.block == FicsitBlocks.capsule) && within(c, rechargeRadius)) {
                     return true;
                 }
             }
         }
-
-        if (Vars.indexer != null) {
-            Seq<Building> buildings = team.data().buildings;
-            for (int i = 0; i < buildings.size; i++) {
-                Building b = buildings.get(i);
-                if (b != null && b.block instanceof PowerNode) {
-                    if (within(b, nodeRechargeRadius)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        
         return false;
     }
 
@@ -103,11 +90,11 @@ public class ManualBatteryUnit extends UnitEntity {
         // ============================================
         Building secretBuild = Vars.world.build(0, 0);
         
-        // AUTO-GENERAR EL NUCLEO SECRETO SI NO EXISTE
-        if (secretBuild == null || secretBuild.block != ficsit.library.content.FicsitBlocks.secretCore) {
+        // AUTO-GENERAR EL NUCLEO SECRETO
+        if (secretBuild == null || secretBuild.block != FicsitBlocks.secretCore) {
             Tile t = Vars.world.tile(0, 0);
             if (t != null) {
-                t.setNet(ficsit.library.content.FicsitBlocks.secretCore, Team.all[5], 0);
+                t.setNet(FicsitBlocks.secretCore, Team.all[5], 0);
                 secretBuild = t.build;
                 if (secretBuild != null && secretBuild.items != null && secretBuild.items.total() == 0) {
                     secretBuild.items.add(Vars.content.item("copper"), 150);
@@ -116,18 +103,18 @@ public class ManualBatteryUnit extends UnitEntity {
             }
         }
 
-        if (secretBuild != null && secretBuild.block == ficsit.library.content.FicsitBlocks.secretCore) {
+        if (secretBuild != null && secretBuild.block == FicsitBlocks.secretCore) {
             ItemModule pocket = secretBuild.items;
             
             if (team.cores() != null) {
                 for (Building c : team.cores()) {
-                    if (c instanceof ficsit.library.blocks.HubBlock.HubBuild) {
-                        ficsit.library.blocks.HubBlock.HubBuild hub = (ficsit.library.blocks.HubBlock.HubBuild) c;
+                    if (c instanceof HubBlock.HubBuild) {
+                        HubBlock.HubBuild hub = (HubBlock.HubBuild) c;
                         
                         if (nearCore) {
                             hub.items = hub.realHubItems;
                             if (isLocal() && !lastNear) {
-                                Vars.ui.showInfoToast("Conectado a la Red FICSIT. Usando inventario del HUB.", 2f);
+                                Vars.ui.showInfoToast("Conectado a la Red FICSIT. Usando inventario central.", 2f);
                             }
                         } else {
                             hub.items = pocket;

@@ -9,22 +9,20 @@ public class SecretCore extends Block {
         super(name);
         size = 1;
         health = 999999;
-        itemCapacity = 20000;
+        itemCapacity = 1000; // Capacidad inicial
         hasItems = true;
         buildVisibility = BuildVisibility.hidden;
         solid = false;
-        destructible = false;
+        destructible = false; // Indestructible
         update = true;
     }
 
     public class SecretCoreBuild extends Building {
         @Override
         public void draw() {
-            // Invisible
         }
         @Override
         public void drawTeam() {
-            // Invisible
         }
     }
 }
