@@ -1,0 +1,22 @@
+# Gradle & Build outputs
+.gradle/
+build/
+bin/
+out/
+*.class
+*.jar
+*.dex
+*.bin
+*.lock
+
+# IDE & Editor files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# OS specific
+.DS_Store
+Thumbs.db
