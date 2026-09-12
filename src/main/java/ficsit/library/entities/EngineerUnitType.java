@@ -30,21 +30,24 @@ public class EngineerUnitType extends UnitType {
         mineSpeed = 6f;
         mineTier = 2;
 
+        // Capacidad de munición / batería (utilizado por el SideBar nativo del HUD)
+        ammoCapacity = 100;
+        ammoType = new BatteryAmmoType();
+
         // Desactivar el dibujo de círculo de daño de escudo sobre el sprite (igual que en Oct)
         drawShields = false;
 
-        // Añadir la habilidad de batería que hereda de ForceFieldAbility
-        // Esto hace que Mindustry dibuje automáticamente la barra de batería (Pal.accent)
-        // a la izquierda de la barra de vida en el HUD del jugador, exactamente como en el Oct y Quasar.
+        // Habilidad de batería para el inspector / panel de estadísticas de la unidad
         abilities.add(new BatteryAbility(100f));
 
-        // Arma principal de la unidad
+        // Arma principal de la unidad (useAmmo = false para que disparar use su propio balance o no consuma la batería de soporte vital)
         weapons.add(new Weapon("ficsit-library-engineer-weapon") {{
             x = 0f;
             y = 0f;
             mirror = false;
             reload = 15f;
             shoot.shots = 1;
+            useAmmo = false;
             bullet = new BasicBulletType(4f, 10) {{
                 width = 5f;
                 height = 7f;

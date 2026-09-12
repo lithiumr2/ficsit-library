@@ -3,6 +3,7 @@ package ficsit.library.entities;
 import arc.util.Time;
 import arc.util.io.Reads;
 import arc.util.io.Writes;
+import mindustry.Vars;
 import mindustry.gen.Building;
 import mindustry.gen.EntityMapping;
 import mindustry.gen.UnitEntity;
@@ -36,6 +37,7 @@ public class ManualBatteryUnit extends UnitEntity {
         this.battery = 100f;
         this.maxBattery = 100f;
         this.shield = 100f;
+        this.ammo = 100f;
     }
 
     @Override
@@ -49,9 +51,25 @@ public class ManualBatteryUnit extends UnitEntity {
 
         if (!isAdded() || dead) return;
 
-        // Comprobar recarga cerca de núcleo aliado
+        // Asegurar que las reglas permitan mostrar la barra de batería en el HUD del jugador
+        if (isPlayer() && Vars.state != null && Vars.state.rules != null) {
+            Vars.state.rules.unitAmmo = true;
+        }
+
+        // Comprobar recarga cerca de núcleo aliado (o red de energía aliada)
         Building core = closestCore();
-        boolean nearCore = (core != null && within(core, rechargeRadius));
+        boolean nearCore = false;
+        if (core != null && within(core, rechargeRadius)) {
+            nearCore = true;
+        } else if (team != null && team.cores() != null && team.cores().size > 0) {
+            for (int i = 0; i < team.cores().size; i++) {
+                Building c = team.cores().get(i);
+                if (c != null && within(c, rechargeRadius)) {
+                    nearCore = true;
+                    break;
+                }
+            }
+        }
 
         if (nearCore) {
             if (battery < maxBattery) {
@@ -63,17 +81,14 @@ public class ManualBatteryUnit extends UnitEntity {
             }
         }
 
-        // Si la batería se agota, daño paulatino al traje/unidad
+        // Si la batería se agota por completo, daño por asfixia/fallo del traje
         if (battery <= 0f) {
             damage(0.05f * Time.delta);
         }
 
-        // Si la unidad recibió daño, el escudo absorbe el golpe antes que la vida
-        if (shield < battery) {
-            battery = Math.max(0f, shield);
-        } else {
-            shield = Math.max(0f, battery);
-        }
+        // Sincronizar simultáneamente con el escudo nativo y el canal de munición
+        shield = Math.max(0f, battery);
+        ammo = Math.max(0f, battery);
     }
 
     /**
@@ -95,5 +110,6 @@ public class ManualBatteryUnit extends UnitEntity {
         battery = read.f();
         maxBattery = read.f();
         shield = battery;
+        ammo = battery;
     }
 }

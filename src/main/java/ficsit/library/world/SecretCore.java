@@ -15,6 +15,14 @@ public class SecretCore extends CoreBlock {
         buildVisibility = BuildVisibility.hidden;
     }
 
+    @Override
+    public void init() {
+        if (FicsitUnits.engineer != null) {
+            this.unitType = FicsitUnits.engineer;
+        }
+        super.init();
+    }
+
     public class SecretCoreBuild extends CoreBuild {
         @Override
         public void draw() {

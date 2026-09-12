@@ -7,6 +7,7 @@ import arc.util.Time;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Fill;
 import arc.graphics.Color;
+import mindustry.Vars;
 
 public class EngineerUnitEntity extends UnitEntity {
     public float battery = 100f;
@@ -21,11 +22,23 @@ public class EngineerUnitEntity extends UnitEntity {
         return classId;
     }
 
+    public EngineerUnitEntity() {
+        super();
+        this.battery = 100f;
+        this.maxBattery = 100f;
+        this.shield = 100f;
+        this.ammo = 100f;
+    }
+
     @Override
     public void update() {
         super.update();
 
         if(!isAdded() || dead) return;
+
+        if (isPlayer() && Vars.state != null && Vars.state.rules != null) {
+            Vars.state.rules.unitAmmo = true;
+        }
 
         Building nucleo = closestCore();
         boolean cercaDeNucleo = (nucleo != null && within(nucleo, radioDeRecarga));
@@ -44,11 +57,8 @@ public class EngineerUnitEntity extends UnitEntity {
             damage(0.05f);
         }
 
-        if(shield < battery) {
-            battery = Math.max(0f, shield);
-        } else {
-            shield = Math.max(0f, battery);
-        }
+        shield = Math.max(0f, battery);
+        ammo = Math.max(0f, battery);
     }
 
     @Override
