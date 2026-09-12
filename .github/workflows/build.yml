@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ "main", "master" ]
 
+permissions: write-all
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +15,8 @@ jobs:
     steps:
     - name: Checkout del código
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Configurar Java 17
       uses: actions/setup-java@v4
@@ -32,20 +36,21 @@ jobs:
         ANDROID_JAR=$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -n 1)
         echo "Usando d8 en: $D8_BIN"
         echo "Usando android.jar en: $ANDROID_JAR"
-
+        
         JAR_PATH="build/libs/ficsit-library.jar"
         DEX_DIR="build/dex_output"
         mkdir -p "$DEX_DIR"
-
+        
         if [ -n "$ANDROID_JAR" ]; then
           "$D8_BIN" --lib "$ANDROID_JAR" --min-api 21 --output "$DEX_DIR" "$JAR_PATH"
         else
           "$D8_BIN" --min-api 21 --output "$DEX_DIR" "$JAR_PATH"
         fi
-
+        
         cd "$DEX_DIR"
         zip -u "../../$JAR_PATH" classes.dex
         cd ../../
+        
         echo "Contenido final del JAR (debe incluir classes.dex para Android):"
         unzip -l "$JAR_PATH"
 
@@ -54,3 +59,13 @@ jobs:
       with:
         name: ficsit-library-release
         path: build/libs/ficsit-library.jar
+
+    - name: Publicar Release oficial en GitHub para Mindustry
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete v1.0 --yes || true
+        git tag -d v1.0 || true
+        git push origin :refs/tags/v1.0 || true
+        gh release create v1.0 build/libs/ficsit-library.jar --title "v1.0 Ficsit Library" --notes "Release universal para PC y Android (Mindustry v154+)"
