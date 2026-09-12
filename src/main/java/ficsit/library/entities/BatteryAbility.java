@@ -39,10 +39,6 @@ public class BatteryAbility extends ForceFieldAbility {
             // Sincronizar el campo nativo unit.shield con el valor real de batería
             // HudFragment lee shield / ff.max para pintar la barra Pal.accent
             unit.shield = Math.max(0f, b.battery);
-        } else if (unit instanceof EngineerUnitEntity) {
-            EngineerUnitEntity b = (EngineerUnitEntity) unit;
-            this.max = b.maxBattery;
-            unit.shield = Math.max(0f, b.battery);
         }
     }
 
@@ -60,13 +56,6 @@ public class BatteryAbility extends ForceFieldAbility {
     public void displayBars(Unit unit, Table bars) {
         if (unit instanceof ManualBatteryUnit) {
             ManualBatteryUnit b = (ManualBatteryUnit) unit;
-            bars.add(new Bar(
-                () -> "Batería: " + (int) b.battery + " / " + (int) b.maxBattery,
-                () -> Pal.accent,
-                () -> b.maxBattery <= 0f ? 0f : b.battery / b.maxBattery
-            )).row();
-        } else if (unit instanceof EngineerUnitEntity) {
-            EngineerUnitEntity b = (EngineerUnitEntity) unit;
             bars.add(new Bar(
                 () -> "Batería: " + (int) b.battery + " / " + (int) b.maxBattery,
                 () -> Pal.accent,

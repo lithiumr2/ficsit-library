@@ -17,9 +17,11 @@ import mindustry.gen.UnitEntity;
 public class ManualBatteryUnit extends UnitEntity {
     public float battery = 100f;
     public float maxBattery = 100f;
-    public float rechargeRadius = 300f;
+    public float rechargeRadius = 1600f; // Mayor alcance para mundo abierto
     public float rechargeRate = 1.5f;
-    public float decayRate = 0.05f;
+    public float decayRate = 0.01f; // Batería dura aprox 2.77 minutos
+
+    private transient float asfixiaTimer = 0f;
 
     /** Identificador de clase asignado en el EntityMapping del motor */
     public static int classId = -1;
@@ -77,7 +79,13 @@ public class ManualBatteryUnit extends UnitEntity {
 
         // Si la batería se agota por completo, daño por asfixia/fallo del traje
         if (battery <= 0f) {
-            damage(0.05f * Time.delta);
+            asfixiaTimer += Time.delta;
+            if (asfixiaTimer >= 60f) { // Acumula el daño durante un segundo (aprox 60 ticks)
+                damage(1f); // 1 de daño por segundo (50s antes de morir)
+                asfixiaTimer = 0f; // Reinicia el acumulador
+            }
+        } else {
+            asfixiaTimer = 0f;
         }
 
         // Sincronizar con el escudo nativo (HudFragment lee unit.shield)
