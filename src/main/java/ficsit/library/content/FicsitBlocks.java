@@ -5,13 +5,17 @@ import mindustry.type.Category;
 import mindustry.type.ItemStack;
 import ficsit.library.blocks.HubBlock;
 import ficsit.library.blocks.ChargeStation;
+import ficsit.library.world.SecretCore;
 import mindustry.content.Items;
 
 public class FicsitBlocks {
+    public static Block secretCore;
     public static Block hub;
     public static Block chargeStation;
 
     public static void load() {
+        secretCore = new SecretCore("secret-core");
+
         hub = new HubBlock("ficsit-hub") {{
             requirements(Category.effect, ItemStack.with());
             alwaysUnlocked = true;

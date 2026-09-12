@@ -42,20 +42,20 @@ public class ManualBatteryUnit extends UnitEntity {
     public boolean isNearCore() {
         if (team == null || Vars.state.isMenu()) return false;
         
-        // 1. Check near cores
-        if (team.cores() != null) {
-            for (int i = 0; i < team.cores().size; i++) {
-                Building c = team.cores().get(i);
-                if (c != null && within(c, rechargeRadius)) {
+        // Siempre buscamos en el equipo Team.sharded (el HUB principal) para detectar cercanía
+        Team hubTeam = Team.sharded;
+        if (hubTeam.cores() != null) {
+            for (int i = 0; i < hubTeam.cores().size; i++) {
+                Building c = hubTeam.cores().get(i);
+                if (c != null && c.block == ficsit.library.content.FicsitBlocks.hub && within(c, rechargeRadius)) {
                     return true;
                 }
             }
         }
 
-        // 2. Check near power nodes (Estaciones de carga / Postes)
-        // Recorremos los edificios para encontrar nodos de energía
+        // También buscamos estaciones de carga o postes del HUB (Team.sharded)
         if (Vars.indexer != null) {
-            Seq<Building> buildings = team.data().buildings;
+            Seq<Building> buildings = hubTeam.data().buildings;
             for (int i = 0; i < buildings.size; i++) {
                 Building b = buildings.get(i);
                 if (b != null && b.block instanceof PowerNode) {
@@ -75,6 +75,23 @@ public class ManualBatteryUnit extends UnitEntity {
         if (!isAdded() || dead) return;
 
         boolean nearCore = isNearCore();
+
+        // Alternar dinámicamente de equipo (y por lo tanto de inventario de núcleo) según la distancia
+        if (nearCore) {
+            if (team != Team.sharded) {
+                team(Team.sharded);
+                if (isLocal()) {
+                    Vars.ui.showInfoToast("Conectado al HUB. Usando inventario del HUB.", 2f);
+                }
+            }
+        } else {
+            if (team != Team.blue) {
+                team(Team.blue);
+                if (isLocal()) {
+                    Vars.ui.showInfoToast("Fuera de rango del HUB. Usando inventario personal (Núcleo Secreto).", 2f);
+                }
+            }
+        }
 
         if (nearCore) {
             if (battery < maxBattery) {
@@ -97,43 +114,6 @@ public class ManualBatteryUnit extends UnitEntity {
         }
 
         shield = Math.max(0f, battery);
-        
-        // Restricción de Inventario Independiente:
-        // Si el jugador intenta construir lejos de la red, bloqueamos los planes de construcción mágicos.
-        // Para construir lejos, tiene que usar los ítems físicos de su inventario, lo cual es muy difícil en vanilla.
-        // Para simular la "creación independiente": cancelamos planes si no está en rango.
-        if (!nearCore && plans.size > 0 && !Vars.state.rules.infiniteResources) {
-            // Permitimos la construcción SI la unidad tiene un ítem en su inventario que coincide con algún requisito del bloque.
-            // Para simplificar, si está desconectado de la red de energía/HUB, no puede construir desde cero 
-            // mágicamente desde el núcleo.
-            
-            // Evaluamos el primer plan
-            mindustry.entities.units.BuildPlan plan = plans.first();
-            if(plan != null && plan.block != null) {
-                // Si la unidad lleva un item y el bloque lo requiere, lo dejamos intentar (Mindustry usará su inventario)
-                if(stack.amount > 0 && plan.block.requirements != null) {
-                    boolean requiresCarriedItem = false;
-                    for(mindustry.type.ItemStack req : plan.block.requirements) {
-                        if(req.item == stack.item) {
-                            requiresCarriedItem = true;
-                            break;
-                        }
-                    }
-                    if(!requiresCarriedItem) {
-                        plans.removeIndex(0);
-                        if(isLocal()) {
-                            Vars.ui.showInfoToast("Fuera de la red eléctrica. Carga ítems en tu inventario para construir.", 1f);
-                        }
-                    }
-                } else {
-                    // No lleva ítems útiles, cancelamos el plan.
-                    plans.removeIndex(0);
-                    if(isLocal()) {
-                        Vars.ui.showInfoToast("Sin conexión al HUB. Construye Postes Eléctricos para extender la red.", 1f);
-                    }
-                }
-            }
-        }
     }
 
     @Override

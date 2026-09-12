@@ -10,6 +10,7 @@ import mindustry.ui.Styles;
 import mindustry.type.Item;
 import mindustry.world.blocks.power.PowerNode;
 import mindustry.world.meta.BlockGroup;
+import mindustry.game.Team;
 
 public class ChargeStation extends PowerNode {
 
@@ -25,6 +26,29 @@ public class ChargeStation extends PowerNode {
     }
 
     public class ChargeStationBuild extends PowerNodeBuild {
+        @Override
+        public void updateTile() {
+            super.updateTile();
+            
+            // Detectar unidades aliadas sobre la estación y transferir sus ítems al núcleo secreto (Team.blue)
+            mindustry.gen.Groups.unit.intersect(x - size * 4f, y - size * 4f, size * 8f, size * 8f, u -> {
+                if (u.team == Team.sharded || u.team == Team.blue) {
+                    if (u.stack.amount > 0) {
+                        Building targetCore = Team.blue.core();
+                        if (targetCore != null) {
+                            int amount = u.stack.amount;
+                            mindustry.type.Item item = u.stack.item;
+                            targetCore.items.add(item, amount);
+                            u.clearItem();
+                            if (u.isPlayer()) {
+                                Vars.ui.showInfoToast("Items guardados en el Inventario Personal: +" + amount + " " + item.localizedName, 2.5f);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
         @Override
         public void buildConfiguration(Table table) {
             super.buildConfiguration(table);
