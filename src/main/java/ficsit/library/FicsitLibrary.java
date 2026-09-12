@@ -10,9 +10,11 @@ import mindustry.game.Rules;
 import mindustry.game.Team;
 import mindustry.gen.Building;
 import mindustry.world.Tile;
+import ficsit.library.content.FicsitPlanets;
 import ficsit.library.core.ChunkManager;
 import ficsit.library.core.FicsitGenerator;
 import ficsit.library.core.VirtualWorldManager;
+
 import static mindustry.Vars.*;
 
 public class FicsitLibrary extends FicsitLibraryMod {
@@ -20,9 +22,18 @@ public class FicsitLibrary extends FicsitLibraryMod {
     public FicsitLibrary() {
         super();
 
-        // Botón en el menú principal para iniciar el Mundo Abierto FICSIT con 1 clic directo
+        // Botones en el menu principal para acceso directo
         Events.on(EventType.ClientLoadEvent.class, e -> {
             if (Vars.ui != null && Vars.ui.menufrag != null) {
+                // Boton directo para abrir la vista del Planeta FICSIT en Campaña
+                Vars.ui.menufrag.addButton("Planeta FICSIT", () -> {
+                    if (Vars.ui.planet != null && FicsitPlanets.massageage != null) {
+                        Vars.ui.planet.show();
+                        Vars.ui.planet.viewPlanet(FicsitPlanets.massageage, true);
+                    }
+                });
+
+                // Boton directo para iniciar el Mundo Abierto FICSIT con 1 clic directo
                 Vars.ui.menufrag.addButton("Mundo FICSIT (500x500)", () -> {
                     Vars.ui.loadAnd(() -> {
                         Vars.logic.reset();
@@ -42,7 +53,7 @@ public class FicsitLibrary extends FicsitLibraryMod {
             }
         });
 
-        // Configuración de HUB al cargar mundo
+        // Configuracion de HUB al cargar mundo
         Events.on(WorldLoadEvent.class, e -> {
             spawnHubCore();
         });

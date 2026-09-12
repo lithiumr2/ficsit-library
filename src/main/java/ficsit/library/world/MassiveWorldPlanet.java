@@ -25,6 +25,11 @@ public class MassiveWorldPlanet extends Planet {
         startSector = 0;
         alwaysUnlocked = true;
         allowLaunchToNumbered = true;
+        accessible = true;
+        visible = true;
+        
+        orbitRadius = 18f;
+        orbitSpacing = 3f;
         
         defaultCore = Blocks.coreShard;
         
