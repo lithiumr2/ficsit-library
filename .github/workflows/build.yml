@@ -23,11 +23,34 @@ jobs:
     - name: Configurar Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Compilar y empaquetar mod
+    - name: Compilar mod de escritorio (JAR)
       run: gradle jar
 
-    - name: Subir artefacto JAR
+    - name: Dexificar para Android con d8 (classes.dex)
+      run: |
+        D8_BIN=$(find "$ANDROID_HOME/build-tools" -name d8 -type f | sort -V | tail -n 1)
+        ANDROID_JAR=$(find "$ANDROID_HOME/platforms" -name android.jar -type f | sort -V | tail -n 1)
+        echo "Usando d8 en: $D8_BIN"
+        echo "Usando android.jar en: $ANDROID_JAR"
+
+        JAR_PATH="build/libs/ficsit-library.jar"
+        DEX_DIR="build/dex_output"
+        mkdir -p "$DEX_DIR"
+
+        if [ -n "$ANDROID_JAR" ]; then
+          "$D8_BIN" --lib "$ANDROID_JAR" --min-api 21 --output "$DEX_DIR" "$JAR_PATH"
+        else
+          "$D8_BIN" --min-api 21 --output "$DEX_DIR" "$JAR_PATH"
+        fi
+
+        cd "$DEX_DIR"
+        zip -u "../../$JAR_PATH" classes.dex
+        cd ../../
+        echo "Contenido final del JAR (debe incluir classes.dex para Android):"
+        unzip -l "$JAR_PATH"
+
+    - name: Subir artefacto JAR universal (PC + Android)
       uses: actions/upload-artifact@v4
       with:
         name: ficsit-library-release
-        path: build/libs/*.jar
+        path: build/libs/ficsit-library.jar
