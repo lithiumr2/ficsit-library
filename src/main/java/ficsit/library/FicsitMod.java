@@ -15,6 +15,7 @@ public class FicsitMod extends Mod {
     public void init() {
         super.init();
         ChunkManager.init(); // Iniciar nuestro gestor de zonas
+        ficsit.library.core.VirtualWorldManager.init();
     }
 
     @Override
