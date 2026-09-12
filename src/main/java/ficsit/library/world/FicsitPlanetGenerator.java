@@ -21,6 +21,11 @@ public class FicsitPlanetGenerator extends PlanetGenerator {
         return Color.valueOf("4a9937");
     }
 
+    // Sobrecarga para Mindustry v8 (HexMesher)
+    public void getColor(Vec3 position, Color out) {
+        out.set(Color.valueOf("4a9937"));
+    }
+
     @Override
     public int getSectorSize(Sector sector) {
         return 500;
