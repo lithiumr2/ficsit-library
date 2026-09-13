@@ -81,7 +81,6 @@ public class FicsitGenerator {
                         t.setFloor(floorToPlace);
                         t.setOverlay(oreToPlace);
                         t.setAir();
-                        Vars.world.notifyChanged(t);
                     }
                 }
             }
